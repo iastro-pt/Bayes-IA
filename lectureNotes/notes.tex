@@ -16,7 +16,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %----------------------------------------------------------------------------------------
-%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%   PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
 \documentclass[a4paper,11pt]{article}
@@ -28,6 +28,12 @@
 \usepackage{hyperref}
 \usepackage{amsmath}
 \usepackage[tikz]{bclogo}
+\usepackage{minted}
+
+% \setsansfont{Calibri}
+% \setmonofont{Consolas}
+
+
 
 \usepackage{mathpazo} % Use the Palatino font
 \usepackage[T1]{fontenc} % Required for accented characters
@@ -62,7 +68,7 @@
 
 
 %----------------------------------------------------------------------------------------
-%	TITLE
+%   TITLE
 %----------------------------------------------------------------------------------------
 
 \title{\textbf{Data don't speak for themselves}\\ % Title
@@ -80,7 +86,7 @@ a Bayesian course} % Subtitle
 \maketitle % Print the title section
 
 %----------------------------------------------------------------------------------------
-%	ABSTRACT AND KEYWORDS
+%   ABSTRACT AND KEYWORDS
 %----------------------------------------------------------------------------------------
 
 %\renewcommand{\abstractname}{Summary} % Uncomment to change the name of the abstract to something else
@@ -103,7 +109,7 @@ No coin tossing, only real applications that relate to our day-to-day problems.
 
 
 %----------------------------------------------------------------------------------------
-%	ESSAY BODY
+%   ESSAY BODY
 %----------------------------------------------------------------------------------------
 
 \newpage
@@ -139,13 +145,13 @@ All this will be explained later but the options we have when working with these
 
 \vskip1em
 \begin{fancyquote}{Pierre-Simon Laplace}
-	On voit, par cet Essai, que la théorie des probabilités n'est, au fond, que le bon sens réduit au calcul;
+   On voit, par cet Essai, que la théorie des probabilités n'est, au fond, que le bon sens réduit au calcul;
 \end{fancyquote}
 
 If we have a continuous parameter $a$, and a probability distribution function $p(a)$ for $a$, it must obey the normalization condition
 %
 \begin{equation}
-	1 = \int p(a) \, da
+   1 = \int p(a) \, da
 \end{equation}
 %
 where the integral is limited by the domain%
@@ -156,7 +162,7 @@ Often times we will have more than one parameter.
 Even if we \emph{condition} $p(a)$ on some particular value of another parameter $b$, that is, we ask for $p(a | b)$ (read ``the pdf for $a$ given $b$''), it must obey the same normalization
 %
 \begin{equation}\label{eq:normalisation}
-	1 = \int p(a|b) \, da
+   1 = \int p(a|b) \, da
 \end{equation}
 %
 
@@ -164,8 +170,8 @@ If we have a probability distribution for two things, $p(a,b)$ (read ``the pdf f
 $b$''), you can always factorize it into two distributions, one for $a$, and one for $b$ given $a$ or the other way around:
 %
 \begin{align}
-	p(a,b) &= p(a) \, p(b|a)\\
-	p(a,b) &= p(b) \, p(a|b)
+   p(a,b) &= p(a) \, p(b|a)\\
+   p(a,b) &= p(b) \, p(a|b)
 \end{align}
 %
 
@@ -173,25 +179,25 @@ These two factorisations together lead%
 \footnote{Bayes' theorem is a consequence of the previous equations, it is not assumed as a rule. That's why it's called a theorem, actually.} to Bayes' theorem:
 %
 \begin{equation}
-	p(a|b) = \frac{p(b|a)\,p(a)}{p(b)} .
+   p(a|b) = \frac{p(b|a)\,p(a)}{p(b)} .
 \end{equation}
 %
 
 Conditional probabilities factor just the same as unconditional ones
 %
 \begin{align}
-	p(a,b|c) &= p(a|c) \, p(b|a,c)\\
-	p(a,b|c) &= p(b|c) \, p(a|b,c)\\
-	p(a|b,c) &= \frac{p(b|a,c)\,p(a|c)}{p(b|c)} \label{eq:bayes}
+   p(a,b|c) &= p(a|c) \, p(b|a,c)\\
+   p(a,b|c) &= p(b|c) \, p(a|b,c)\\
+   p(a|b,c) &= \frac{p(b|a,c)\,p(a|c)}{p(b|c)} \label{eq:bayes}
 \end{align}
-%	
+%   
 where we just carried the condition $c$ through all the terms.
 
 You can integrate out or \emph{marginalize} variables you want to get rid of (or \emph{not} infer) by integrals like
 %
 \begin{align}
-	p(a|c) &= \int p(a,b|c) \, db \\
-	p(a|c) &= \int p(a|b,c)\,p(b|c) \, db
+   p(a|c) &= \int p(a,b|c) \, db \\
+   p(a|c) &= \int p(a|b,c)\,p(b|c) \, db
 \end{align}
 %
 where the second is a factorized version of the first.
@@ -214,10 +220,10 @@ Then we can write Eq. \eqref{eq:bayes} as
 The terms in this equation are usually called
 %
 \begin{itemize}
-	\item[] $p(\theta|D,\mathcal{I})$ the posterior distribution
-	\item[] $p(\theta|\mathcal{I})$ the prior distribution
-	\item[] $p(D|\theta,\mathcal{I})$ the likelihood
-	\item[] $p(D|\mathcal{I})$ the evidence, sometimes denoted with a $\mathcal{Z}$.
+   \item[] $p(\theta|D,\mathcal{I})$ the posterior distribution
+   \item[] $p(\theta|\mathcal{I})$ the prior distribution
+   \item[] $p(D|\theta,\mathcal{I})$ the likelihood
+   \item[] $p(D|\mathcal{I})$ the evidence, sometimes denoted with a $\mathcal{Z}$.
 \end{itemize}
 %
 but calling them this may hide something important (see Section \ref{sec:likelihood}).
@@ -227,14 +233,14 @@ From Eq. \eqref{eq:normalisation} we can derive%
 that
 %
 \begin{equation}
-	p(D|\mathcal{I}) = \mathcal{Z} = \int p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I}) \, d\theta
+   p(D|\mathcal{I}) = \mathcal{Z} = \int p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I}) \, d\theta
 \end{equation}
 %
 
 Because $\mathcal{Z}$ does not depend on $\theta$, you might see many times Eq. \eqref{eq:bayes2} written as
 %
 \begin{equation}\label{eq:propto}
-	p(\theta|D,\mathcal{I}) \propto p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I}) ,
+   p(\theta|D,\mathcal{I}) \propto p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I}) ,
 \end{equation}
 %
 so \textbf{the posterior is proportional to the likelihood times the prior}.
@@ -242,14 +248,14 @@ Nevertheless, try to stick with Eq. \eqref{eq:bayes2}; $\mathcal{Z}$ contains in
 
 \vskip1em
 \begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
-	Eq. \eqref{eq:propto} means that the likelihood and the prior can be defined up to an arbitrary multiplicative constant (i.e. not a function of $\theta$).
+   Eq. \eqref{eq:propto} means that the likelihood and the prior can be defined up to an arbitrary multiplicative constant (i.e. not a function of $\theta$).
 \end{bclogo}
 
 
 For example, imagine we are interested in comparing two models $M_1$ and $M_2$ which have parameters $\theta_1$ and $\theta_2$, respectively. We still only have data $D$. Bayes' theorem works the same:
 %
 \begin{equation}
-	p(M_i|D,\mathcal{I}) = \frac{p(M_i|\mathcal{I}) \, p(D|M_i,\mathcal{I})}{p(D|\mathcal{I})}
+   p(M_i|D,\mathcal{I}) = \frac{p(M_i|\mathcal{I}) \, p(D|M_i,\mathcal{I})}{p(D|\mathcal{I})}
 \end{equation}
 %
 and the ratio of model probabilities is
@@ -275,11 +281,11 @@ If we believe they are equally likely at the start, then this is equal to 1.
 
 \vskip1em
 \begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
-	$\theta_1$ and $\theta_2$ can be any set of parameters and, in particular, they can have different sizes.
-	Say model $M_1$ has 2 parameters $\theta_1 = (a, b)$ and model $M_2$ only has one parameter $\theta_2 = (c)$.
-	Then the integrals in Eq. \eqref{eq:model_comp3} are of different dimensionality.
-	That's fine, probability theory doesn't care.
-	Enough of that ``divide by the degrees of freedom'' nonsense! \cite{Andrae2010}
+   $\theta_1$ and $\theta_2$ can be any set of parameters and, in particular, they can have different sizes.
+   Say model $M_1$ has 2 parameters $\theta_1 = (a, b)$ and model $M_2$ only has one parameter $\theta_2 = (c)$.
+   Then the integrals in Eq. \eqref{eq:model_comp3} are of different dimensionality.
+   That's fine, probability theory doesn't care.
+   Enough of that ``divide by the degrees of freedom'' nonsense! \cite{Andrae2010}
 \end{bclogo}
 
 
@@ -298,8 +304,8 @@ Therefore, the likelihood encodes prior information.
 %
 Following \cite{Brewer2013}, the likelihood is \emph{not} 
 \begin{itemize}
-	\item[-] the process that generated the data
-	\item[-] the pdf that your data kind of looks like when you plot it in a histogram
+   \item[-] the process that generated the data
+   \item[-] the pdf that your data kind of looks like when you plot it in a histogram
 \end{itemize}
 
 It is, instead, what we usually call \emph{the model}.
@@ -310,6 +316,74 @@ And the model is nothing else than a set of assumptions about the data and how t
 
 
 \section{MCMC}
+
+Markov chain Monte Carlo (MCMC) is the workhorse of Bayesian statistics.
+But how does it work? 
+And what does it actually do?
+We will write the code for our own MCMC in the practical classes.
+If that is enough for you to \emph{understand} it, skip the next section.
+But if you want to know \emph{why} it works, carry on reading.
+
+
+\subsection{A basic MCMC implementation}
+
+We will only talk about the Metropolis-Hastings algorithm to do MCMC.
+It is probably not the simplest, but it is definitely the most often used.
+
+\noindent The following is adapted slightly from Wikipedia:
+
+\begin{quote}
+   Let $f(x)$ be a function that is proportional to the desired probability distribution $P(x)$ (a.k.a. the target distribution).
+
+    \textbf{Initialization:}\\
+    Choose an arbitrary point $x_0$ to be the first sample, and choose an arbitrary probability density $Q(x|y)$ which suggests a candidate for the next sample value $x$, given the previous sample value $y$. A usual choice is to let $Q(x|y)$ be a Gaussian distribution centered at $y$. The function $Q$ is referred to as the proposal density or jumping distribution.
+
+    \textbf{For each iteration t:}
+    \begin{itemize}
+      \item Generate a candidate $x'$ for the next sample by picking from the distribution $Q(x'|x_t)$.
+      \item Calculate the acceptance ratio $\alpha = f(x')/f(x_t)$. Because $f$ is proportional to $P$, we have that $\alpha = f(x')/f(x_t) = P(x')/P(x_t)$.
+      \item If $\alpha \geq 1$, then the candidate is more likely than $x_t$: automatically accept the candidate by setting $x_{t+1} = x'$. \\
+      Otherwise, accept the candidate with probability $\alpha$;\\
+      if the candidate is rejected, set $x_{t+1} = x_t$, instead.
+\end{itemize}
+\end{quote}
+
+Let's see this in \texttt{Python} code
+
+
+\begin{minted}[linenos,
+               numbersep=5pt,
+               gobble=2,
+               frame=lines,
+               framesep=2mm]{python}
+  import numpy as np
+  from scipy.stats import norm
+  
+  # number of iterations to run MCMC
+  niter = 500
+  
+  # posterior distribution (the distribution we want to sample from)
+  p = lambda x:norm.pdf(x)
+  
+  # starting point
+  x = [0.5]
+  
+  for step in range(niter):
+     # propose a step
+     d = np.random.randn()
+     
+     # calculate the ratio of posterior probabilities
+     alpha = p(x[-1]+d) / p(x[-1])
+  
+     if alpha > 1.:
+        x.append(x[-1]+d)     # accept the new step
+     else:
+        u = np.random.uniform()
+        if ratio > u:
+           x.append(x[-1]+d)  # accept the new step
+        else:
+           x.append(x[-1])    # reject the new step (stay where we are)
+\end{minted}
 
 This statement requires citation \cite{Smith:2012qr}; this one does too \cite{Smith:2013jd}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean dictum lacus sem, ut varius ante dignissim ac. Sed a mi quis lectus feugiat aliquam. Nunc sed vulputate velit. Sed commodo metus vel felis semper, quis rutrum odio vulputate. Donec a elit porttitor, facilisis nisl sit amet, dignissim arcu. Vivamus accumsan pellentesque nulla at euismod. Duis porta rutrum sem, eu facilisis mi varius sed. Suspendisse potenti. Mauris rhoncus neque nisi, ut laoreet augue pretium luctus. Vestibulum sit amet luctus sem, luctus ultrices leo. Aenean vitae sem leo.
 
@@ -346,7 +420,7 @@ Fusce in nibh augue. Cum sociis natoque penatibus et magnis dis parturient monte
 Donec luctus tincidunt mauris, non ultrices ligula aliquam id. Sed varius, magna a faucibus congue, arcu tellus pellentesque nisl, vel laoreet magna eros et magna. Vivamus lobortis elit eu dignissim ultrices. Fusce erat nulla, ornare at dolor quis, rhoncus venenatis velit. Donec sed elit mi. Sed semper tellus a convallis viverra. Maecenas mi lorem, placerat sit amet sem quis, adipiscing tincidunt turpis. Cras a urna et tellus dictum eleifend. Fusce dignissim lectus risus, in bibendum tortor lacinia interdum.
 
 %----------------------------------------------------------------------------------------
-%	BIBLIOGRAPHY
+%   BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
 \bibliographystyle{unsrt}
