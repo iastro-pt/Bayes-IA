@@ -132,7 +132,8 @@ in its actions, and takes as input \emph{(i)} data and \emph{(ii)} the subjectiv
 
 \section{The basics of probability theory}
 
-Here we present the rules of the game. 
+Here we present the rules of the game.
+I follow very closely (too closely) the presentation in \cite{Hogg2012}.
 Using Bayesian statistics to analyse data (some might call it doing probabilistic inference) means working with likelihoods, prior probabilities, posterior probabilities and marginalization of nuisance parameters.
 All this will be explained later but the options we have when working with these mathematical objects are strongly constrained by the rules of probability calculus.
 
@@ -147,7 +148,9 @@ If we have a continuous parameter $a$, and a probability distribution function $
 	1 = \int p(a) \, da
 \end{equation}
 %
-where the integral is limited by the domain of $a$.
+where the integral is limited by the domain%
+% \footnote{The domain of $a$ is called the \emph{support} of $p(a)$.}%
+~of $a$.
 
 Often times we will have more than one parameter. 
 Even if we \emph{condition} $p(a)$ on some particular value of another parameter $b$, that is, we ask for $p(a | b)$ (read ``the pdf for $a$ given $b$''), it must obey the same normalization
