@@ -25,7 +25,8 @@ The idea is to present some statistical results in an intuitive manner
 and then turn to computational methods.
 By the end of the course, the students should be able to understand:
 
- THEORY
+THEORY
+
  - what are the main differences between frequentist and Bayesian statistics
  	. problems with p-values, confidence intervals and null hypothesis testing
  - the basic rules of probability theory
@@ -37,7 +38,8 @@ By the end of the course, the students should be able to understand:
 	. beta-binomial model, 
 	. hierarchical models
 
- PRACTICE
+PRACTICE
+
  - what is an MCMC, how it works and why it works; shortcomings (and alternatives)
  - code an MCMC from scratch to sample a distribution
  - for the (weighted) linear regression model
