@@ -17,8 +17,6 @@ relate to our day-to-day problems.
 
 
 
-
-
 Plan for the course
 ===================
 
@@ -71,9 +69,6 @@ By the end of the course, the students should be able to understand:
 
 	- Build a hierarchical model
 		. maybe use the HARPS offset as an example?
-
-
-
 
 
 
