@@ -19,7 +19,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[a4paper,11pt,draft]{article}
+\documentclass[a4paper,11pt]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[protrusion=true,expansion=true]{microtype} % Better typography
@@ -99,11 +99,16 @@ No coin tossing, only real applications that relate to our day-to-day problems.
 
 \vspace{30pt} % Some vertical space between the abstract and first section
 
+\tableofcontents
+
+
 %----------------------------------------------------------------------------------------
 %	ESSAY BODY
 %----------------------------------------------------------------------------------------
 
+\newpage
 \section*{A (tiny) primer on philosophy}
+\addcontentsline{toc}{section}{A (tiny) primer on philosophy}
 
 While preparing for this course, I asked people what it was they wanted to learn about.
 Much to my dismay, no one answered with ``the philosophy of Bayesian statistics''.
@@ -230,7 +235,7 @@ Because $\mathcal{Z}$ does not depend on $\theta$, you might see many times Eq. 
 \end{equation}
 %
 so \textbf{the posterior is proportional to the likelihood times the prior}.
-Nevertheless, try to stick with Eq. \eqref{eq:bayes2}, as $\mathcal{Z}$ contains in it a big deal of information.
+Nevertheless, try to stick with Eq. \eqref{eq:bayes2}; $\mathcal{Z}$ contains in it a big deal of information.
 
 \vskip1em
 \begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
@@ -275,6 +280,12 @@ If we believe they are equally likely at the start, then this is equal to 1.
 \end{bclogo}
 
 
+\section{Assigning probabilities}
+
+Now that we have a set of rules with which we can manipulate our distributions, it is useful to learn how we can assign values to all these terms and actually start calculating things.
+
+\subsection{The prior}\label{sec:prior}
+
 \subsection{The likelihood}\label{sec:likelihood}
 
 The likelihood is a prior.
@@ -293,6 +304,9 @@ And the model is nothing else than a set of assumptions about the data and how t
 \textbf{The likelihood provides a (\emph{the}) connection from $\theta$ to $D$}.
 
 
+
+
+\section{MCMC}
 
 This statement requires citation \cite{Smith:2012qr}; this one does too \cite{Smith:2013jd}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean dictum lacus sem, ut varius ante dignissim ac. Sed a mi quis lectus feugiat aliquam. Nunc sed vulputate velit. Sed commodo metus vel felis semper, quis rutrum odio vulputate. Donec a elit porttitor, facilisis nisl sit amet, dignissim arcu. Vivamus accumsan pellentesque nulla at euismod. Duis porta rutrum sem, eu facilisis mi varius sed. Suspendisse potenti. Mauris rhoncus neque nisi, ut laoreet augue pretium luctus. Vestibulum sit amet luctus sem, luctus ultrices leo. Aenean vitae sem leo.
 
