@@ -1,0 +1,341 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thin Sectioned Essay
+% LaTeX Template
+% Version 1.0 (3/8/13)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original Author:
+% Nicolas Diaz (nsdiaz@uc.cl) with extensive modifications by:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[a4paper,11pt,draft]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[protrusion=true,expansion=true]{microtype} % Better typography
+\usepackage{graphicx} % Required for including pictures
+\usepackage{wrapfig} % Allows in-line images
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage[tikz]{bclogo}
+
+\usepackage{mathpazo} % Use the Palatino font
+\usepackage[T1]{fontenc} % Required for accented characters
+\linespread{1.05} % Change line spacing here, Palatino benefits from a slight increase by default
+
+\makeatletter
+\renewcommand\@biblabel[1]{\textbf{#1.}} % Change the square brackets for each bibliography item from '[1]' to '1.'
+\renewcommand{\@listI}{\itemsep=0pt} % Reduce the space between items in the itemize and enumerate environments and the bibliography
+
+\renewcommand{\maketitle}{ % Customize the title - do not edit title and author name here, see the TITLE block below
+\begin{flushright} % Right align
+{\LARGE\@title} % Increase the font size of the title
+
+\vspace{50pt} % Some vertical space between the title and author name
+
+{\large\@author} % Author name
+\\\@date % Date
+
+\vspace{40pt} % Some vertical space between the author block and abstract
+\end{flushright}
+}
+
+
+% \makeatletter
+\newenvironment{fancyquote}[2][2em]
+  {\setlength{\@tempdima}{#1}%
+   \def\chapquote@author{#2}%
+   \parshape 1 \@tempdima \dimexpr\textwidth-2\@tempdima\relax%
+   \itshape}
+  {\par\normalfont\hfill--\ \chapquote@author\hspace*{\@tempdima}\par\bigskip}
+\makeatother
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE
+%----------------------------------------------------------------------------------------
+
+\title{\textbf{Data don't speak for themselves}\\ % Title
+a Bayesian course} % Subtitle
+
+\author{\textsc{João P. Faria} % Author
+\\{\textit{Institute of Astrophysics and Space Sciences, Porto}}} % Institution
+
+\date{\today} % Date
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle % Print the title section
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT AND KEYWORDS
+%----------------------------------------------------------------------------------------
+
+%\renewcommand{\abstractname}{Summary} % Uncomment to change the name of the abstract to something else
+
+\begin{abstract}
+Bayesian statistics is rising in popularity in the astrophysical literature. 
+It is no longer a debate: ``work in Bayesian statistics now focuses on applications, computations, and models. Philosophical debates [...] are fading to the background'' \cite{Gelman2014}. 
+This is happening for two main reasons: faster computers and more complex models. 
+In order to keep up, it is important to understand the fundamentals of Bayesian statistics, but it is as important to know how to deal with data analysis applications. 
+In this course I want to provide a brief introduction to advanced concepts in Bayesian statistics.
+Emphasis will be on \emph{intuition} and \emph{computation}.
+No coin tossing, only real applications that relate to our day-to-day problems. 
+\end{abstract}
+
+% \hspace*{3,6mm}\textit{Keywords:} lorem , ipsum , dolor , sit amet , lectus % Keywords
+
+\vspace{30pt} % Some vertical space between the abstract and first section
+
+%----------------------------------------------------------------------------------------
+%	ESSAY BODY
+%----------------------------------------------------------------------------------------
+
+\section*{A (tiny) primer on philosophy}
+
+While preparing for this course, I asked people what it was they wanted to learn about.
+Much to my dismay, no one answered with ``the philosophy of Bayesian statistics''.
+Most want to learn about the ``theory'' and ``applications'' (read MCMC).
+They want to know how they can \emph{use} Bayesian statistics in their work.
+
+Fair enough. But bypassing phylosophy means making assumptions.
+Therefore, I shall introduce here Jaynes' \emph{robot}, an imaginary being whose brain is designed by us, so that it reasons according to certain definite rules \cite{Jaynes2003}.
+These rules will simply be stated, not derived and not defended.
+They will be taken as being true. 
+Then, everything that follows logically from them, everything the robot does, will be true.
+
+The robot is objective%
+\footnote{Which is not saying much... \cite{Gelman2015}.} %
+in its actions, and takes as input \emph{(i)} data and \emph{(ii)} the subjective knowledge we feed into it.
+% In contrast, in frequentist statistics, a similar robot would be a collection of procedures, so-called \emph{tests}, whose explicit input is only the data.
+% Subjective beliefs also play a role in frequentist statistics, but they are hidden.
+
+% One advantage of the Bayesian framework is that the robot is remarkably simple. 
+
+
+\section{The basics of probability theory}
+
+Here we present the rules of the game. 
+Using Bayesian statistics to analyse data (some might call it doing probabilistic inference) means working with likelihoods, prior probabilities, posterior probabilities and marginalization of nuisance parameters.
+All this will be explained later but the options we have when working with these mathematical objects are strongly constrained by the rules of probability calculus.
+
+\vskip1em
+\begin{fancyquote}{Pierre-Simon Laplace}
+	On voit, par cet Essai, que la théorie des probabilités n'est, au fond, que le bon sens réduit au calcul;
+\end{fancyquote}
+
+If we have a continuous parameter $a$, and a probability distribution function $p(a)$ for $a$, it must obey the normalization condition
+%
+\begin{equation}
+	1 = \int p(a) \, da
+\end{equation}
+%
+where the integral is limited by the domain of $a$.
+
+Often times we will have more than one parameter. 
+Even if we \emph{condition} $p(a)$ on some particular value of another parameter $b$, that is, we ask for $p(a | b)$ (read ``the pdf for $a$ given $b$''), it must obey the same normalization
+%
+\begin{equation}\label{eq:normalisation}
+	1 = \int p(a|b) \, da
+\end{equation}
+%
+
+If we have a probability distribution for two things, $p(a,b)$ (read ``the pdf for $a$ and
+$b$''), you can always factorize it into two distributions, one for $a$, and one for $b$ given $a$ or the other way around:
+%
+\begin{align}
+	p(a,b) &= p(a) \, p(b|a)\\
+	p(a,b) &= p(b) \, p(a|b)
+\end{align}
+%
+
+These two factorisations together lead%
+\footnote{Bayes' theorem is a consequence of the previous equations, it is not assumed as a rule. That's why it's called a theorem, actually.} to Bayes' theorem:
+%
+\begin{equation}
+	p(a|b) = \frac{p(b|a)\,p(a)}{p(b)} .
+\end{equation}
+%
+
+Conditional probabilities factor just the same as unconditional ones
+%
+\begin{align}
+	p(a,b|c) &= p(a|c) \, p(b|a,c)\\
+	p(a,b|c) &= p(b|c) \, p(a|b,c)\\
+	p(a|b,c) &= \frac{p(b|a,c)\,p(a|c)}{p(b|c)} \label{eq:bayes}
+\end{align}
+%	
+where we just carried the condition $c$ through all the terms.
+
+You can integrate out or \emph{marginalize} variables you want to get rid of (or \emph{not} infer) by integrals like
+%
+\begin{align}
+	p(a|c) &= \int p(a,b|c) \, db \\
+	p(a|c) &= \int p(a|b,c)\,p(b|c) \, db
+\end{align}
+%
+where the second is a factorized version of the first.
+Remember that, since $b$ can be a very high-dimensional mathematical object (a set of parameters), integrals like these can be extremely difficult to calculate in practice.
+
+
+\subsection{Some familiarity}
+
+Let us write some of the preceding equations with more familiar terms%
+\footnote{Only if you have heard about Bayesian statistics, otherwise just different terms.}.
+
+\noindent We have data $D$ and a set of parameters $\theta$ that we are interested in learning about. 
+In all our analyses we condition on information $\mathcal{I}$ that we have about the world.
+Then we can write Eq. \eqref{eq:bayes} as
+%
+\begin{equation}\label{eq:bayes2}
+  p(\theta|D,\mathcal{I}) = \frac{p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I})}{p(D|\mathcal{I})}
+\end{equation}
+
+The terms in this equation are usually called
+%
+\begin{itemize}
+	\item[] $p(\theta|D,\mathcal{I})$ the posterior distribution
+	\item[] $p(\theta|\mathcal{I})$ the prior distribution
+	\item[] $p(D|\theta,\mathcal{I})$ the likelihood
+	\item[] $p(D|\mathcal{I})$ the evidence, sometimes denoted with a $\mathcal{Z}$.
+\end{itemize}
+%
+but calling them this may hide something important (see Section \ref{sec:likelihood}).
+
+From Eq. \eqref{eq:normalisation} we can derive%
+\footnote{Multiply both sides of Eq. \eqref{eq:bayes} by $p(D|\mathcal{I})$ and integrate over $\theta$, noting that $p(D|\mathcal{I})$ does not depend on $\theta$ and that the posterior obeys Eq. \eqref{eq:normalisation}.}
+that
+%
+\begin{equation}
+	p(D|\mathcal{I}) = \mathcal{Z} = \int p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I}) \, d\theta
+\end{equation}
+%
+
+Because $\mathcal{Z}$ does not depend on $\theta$, you might see many times Eq. \eqref{eq:bayes2} written as
+%
+\begin{equation}\label{eq:propto}
+	p(\theta|D,\mathcal{I}) \propto p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I}) ,
+\end{equation}
+%
+so \textbf{the posterior is proportional to the likelihood times the prior}.
+Nevertheless, try to stick with Eq. \eqref{eq:bayes2}, as $\mathcal{Z}$ contains in it a big deal of information.
+
+\vskip1em
+\begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
+	Eq. \eqref{eq:propto} means that the likelihood and the prior can be defined up to an arbitrary multiplicative constant (i.e. not a function of $\theta$).
+\end{bclogo}
+
+
+For example, imagine we are interested in comparing two models $M_1$ and $M_2$ which have parameters $\theta_1$ and $\theta_2$, respectively. We still only have data $D$. Bayes' theorem works the same:
+%
+\begin{equation}
+	p(M_i|D,\mathcal{I}) = \frac{p(M_i|\mathcal{I}) \, p(D|M_i,\mathcal{I})}{p(D|\mathcal{I})}
+\end{equation}
+%
+and the ratio of model probabilities is
+%
+\begin{align}
+ \frac{p(M_1|D,\mathcal{I})}{p(M_2|D,\mathcal{I})}
+   &= \frac{p(M_1|\mathcal{I}) \, p(D|M_1,\mathcal{I})}{p(M_2|\mathcal{I}) \, p(D|M_2,\mathcal{I})} \\[0.4em]
+   &= \frac{p(M_1|\mathcal{I}) \, \int p(D,\theta_1|M_1,\mathcal{I})\,d\theta_1}
+           {p(M_2|\mathcal{I}) \, \int p(D,\theta_2|M_2,\mathcal{I})\,d\theta_2} \\[0.4em]
+   &= \frac{p(M_1|\mathcal{I}) \, \int p(\theta_1|M_1, \mathcal{I}) \, p(D|\theta_1,M_1,\mathcal{I}) \, d\theta_1}
+           {p(M_2|\mathcal{I}) \, \int p(\theta_2|M_2, \mathcal{I}) \, p(D|\theta_2,M_2,\mathcal{I}) \, d\theta_2}
+           \label{eq:model_comp3} \quad.
+\end{align}
+%
+See how the evidence (of both models) turns out to be important! 
+
+\noindent The term
+%
+\[\frac{p(M_1|\mathcal{I})}{p(M_2|\mathcal{I})}\]
+%
+is the ratio of prior probabilities for the two models. 
+If we believe they are equally likely at the start, then this is equal to 1.
+
+\vskip1em
+\begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
+	$\theta_1$ and $\theta_2$ can be any set of parameters and, in particular, they can have different sizes.
+	Say model $M_1$ has 2 parameters $\theta_1 = (a, b)$ and model $M_2$ only has one parameter $\theta_2 = (c)$.
+	Then the integrals in Eq. \eqref{eq:model_comp3} are of different dimensionality.
+	That's fine, probability theory doesn't care.
+	Enough of that ``divide by the degrees of freedom'' nonsense! \cite{Andrae2010}
+\end{bclogo}
+
+
+\subsection{The likelihood}\label{sec:likelihood}
+
+The likelihood is a prior.
+I will repeat so you know this is not a typo: the likelihood is a prior.
+The term $p(D|\theta,I)$ represents your beliefs on what the data will be like, given parameters $\theta$ and information $I$.
+Therefore, the likelihood encodes prior information.
+%
+Following \cite{Brewer2013}, the likelihood is \emph{not} 
+\begin{itemize}
+	\item[-] the process that generated the data
+	\item[-] the pdf that your data kind of looks like when you plot it in a histogram
+\end{itemize}
+
+It is, instead, what we usually call \emph{the model}.
+And the model is nothing else than a set of assumptions about the data and how they relate to the parameters.
+\textbf{The likelihood provides a (\emph{the}) connection from $\theta$ to $D$}.
+
+
+
+This statement requires citation \cite{Smith:2012qr}; this one does too \cite{Smith:2013jd}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean dictum lacus sem, ut varius ante dignissim ac. Sed a mi quis lectus feugiat aliquam. Nunc sed vulputate velit. Sed commodo metus vel felis semper, quis rutrum odio vulputate. Donec a elit porttitor, facilisis nisl sit amet, dignissim arcu. Vivamus accumsan pellentesque nulla at euismod. Duis porta rutrum sem, eu facilisis mi varius sed. Suspendisse potenti. Mauris rhoncus neque nisi, ut laoreet augue pretium luctus. Vestibulum sit amet luctus sem, luctus ultrices leo. Aenean vitae sem leo.
+
+Nullam semper quam at ante convallis posuere. Ut faucibus tellus ac massa luctus consectetur. Nulla pellentesque tortor et aliquam vehicula. Maecenas imperdiet euismod enim ut pharetra. Suspendisse pulvinar sapien vitae placerat pellentesque. Nulla facilisi. Aenean vitae nunc venenatis, vehicula neque in, congue ligula.
+
+Pellentesque quis neque fringilla, varius ligula quis, malesuada dolor. Aenean malesuada urna porta, condimentum nisl sed, scelerisque nisi. Suspendisse ac orci quis massa porta dignissim. Morbi sollicitudin, felis eget tristique laoreet, ante lacus pretium lacus, nec ornare sem lorem a velit. Pellentesque eu erat congue, ullamcorper ante ut, tristique turpis. Nam sodales mi sed nisl tincidunt vestibulum. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+
+%------------------------------------------------
+
+\section*{Section Name}
+
+Cras gravida, est vel interdum euismod, tortor mi lobortis mi, quis adipiscing elit lacus ut orci. Phasellus nec fringilla nisi, ut vestibulum neque. Aenean non risus eu nunc accumsan condimentum at sed ipsum.
+\begin{wrapfigure}{l}{0.4\textwidth} % Inline image example
+\begin{center}
+\includegraphics[width=0.38\textwidth]{fish.png}
+\end{center}
+\caption{Fish}
+\end{wrapfigure}
+Aliquam fringilla non diam sed varius. Suspendisse tellus felis, hendrerit non bibendum ut, adipiscing vitae diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla lobortis purus eget nisl scelerisque, commodo rhoncus lacus porta. Vestibulum vitae turpis tincidunt, varius dolor in, dictum lectus. Aenean ac ornare augue, ac facilisis purus. Sed leo lorem, molestie sit amet fermentum id, suscipit ut sem. Vestibulum orci arcu, vehicula sed tortor id, ornare dapibus lorem. Praesent aliquet iaculis lacus nec fermentum. Morbi eleifend blandit dolor, pharetra hendrerit neque ornare vel. Nulla ornare, nisl eget imperdiet ornare, libero enim interdum mi, ut lobortis quam velit bibendum nibh.
+
+Morbi tempor congue porta. Proin semper, leo vitae faucibus dictum, metus mauris lacinia lorem, ac congue leo felis eu turpis. Sed nec nunc pellentesque, gravida eros at, porttitor ipsum. Praesent consequat urna a lacus lobortis ultrices eget ac metus. In tempus hendrerit rhoncus. Mauris dignissim turpis id sollicitudin lacinia. Praesent libero tellus, fringilla nec ullamcorper at, ultrices id nulla. Phasellus placerat a tellus a malesuada.
+
+%------------------------------------------------
+
+\section*{Conclusion}
+
+Fusce in nibh augue. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In dictum accumsan sapien, ut hendrerit nisi. Phasellus ut nulla mauris. Phasellus sagittis nec odio sed posuere. Vestibulum porttitor dolor quis suscipit bibendum. Mauris risus lectus, cursus vitae hendrerit posuere, congue ac est. Suspendisse commodo eu eros non cursus. Mauris ultrices venenatis dolor, sed aliquet odio tempor pellentesque. Duis ultricies, mauris id lobortis vulputate, tellus turpis eleifend elit, in gravida leo tortor ultricies est. Maecenas vitae ipsum at dui sodales condimentum a quis dui. Nam mi sapien, lobortis ac blandit eget, dignissim quis nunc.
+
+\begin{enumerate}
+\item First numbered list item
+\item Second numbered list item
+\end{enumerate}
+
+Donec luctus tincidunt mauris, non ultrices ligula aliquam id. Sed varius, magna a faucibus congue, arcu tellus pellentesque nisl, vel laoreet magna eros et magna. Vivamus lobortis elit eu dignissim ultrices. Fusce erat nulla, ornare at dolor quis, rhoncus venenatis velit. Donec sed elit mi. Sed semper tellus a convallis viverra. Maecenas mi lorem, placerat sit amet sem quis, adipiscing tincidunt turpis. Cras a urna et tellus dictum eleifend. Fusce dignissim lectus risus, in bibendum tortor lacinia interdum.
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\bibliographystyle{unsrt}
+
+\bibliography{/home/joao/phd/bib/zotero_library}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
