@@ -21,6 +21,12 @@
 
 \documentclass[a4paper,11pt]{article}
 
+\usepackage{draftwatermark}
+\SetWatermarkText{draft}
+% \SetWatermarkScale{5}
+\SetWatermarkColor[gray]{0.8}
+
+
 \usepackage[utf8]{inputenc}
 \usepackage[protrusion=true,expansion=true]{microtype} % Better typography
 \usepackage{graphicx} % Required for including pictures
@@ -108,6 +114,20 @@ No coin tossing, only real applications that relate to our day-to-day problems.
 \tableofcontents
 
 
+\newpage
+\begin{center}
+  \section*{Before you read}
+  
+  This document is not finished! \\
+  What I have written here is not completely original work: I follow closely, and base the discussion on, many different sources. 
+  Because it's not finished, I have not yet made fair attribution to all these sources.\\[0.2in]
+  I mean no infringement of copyright and no plagiarism.
+\end{center}
+
+
+
+
+
 %----------------------------------------------------------------------------------------
 %   ESSAY BODY
 %----------------------------------------------------------------------------------------
@@ -119,27 +139,22 @@ No coin tossing, only real applications that relate to our day-to-day problems.
 While preparing for this course, I asked people what it was they wanted to learn about.
 Much to my dismay, no one answered with ``the philosophy of Bayesian statistics''.
 Most want to learn about the ``theory'' and ``applications'' (read MCMC).
-They want to know how they can \emph{use} Bayesian statistics in their work.
+They want to know how they can \emph{use} Bayesian statistics in their work%
+\footnote{I later read \cite{Loredo1994} and realised this is not the case for our institute only.}.
 
 Fair enough. But bypassing phylosophy means making assumptions.
-Therefore, I shall introduce here Jaynes' \emph{robot}, an imaginary being whose brain is designed by us, so that it reasons according to certain definite rules \cite{Jaynes2003}.
-These rules will simply be stated, not derived and not defended.
+Therefore, I shall introduce here Jaynes' \emph{robot}, an imaginary being whose brain reasons according to certain definite rules \cite{Jaynes2003}.
+These rules will simply be stated, not derived and not defended (Sect. \ref{sec:basics}). 
 They will be taken as being true. 
 Then, everything that follows logically from them, everything the robot does, will be true.
 
-The robot is objective%
-\footnote{Which is not saying much... \cite{Gelman2015}.} %
-in its actions, and takes as input \emph{(i)} data and \emph{(ii)} the subjective knowledge we feed into it.
-% In contrast, in frequentist statistics, a similar robot would be a collection of procedures, so-called \emph{tests}, whose explicit input is only the data.
-% Subjective beliefs also play a role in frequentist statistics, but they are hidden.
-
-% One advantage of the Bayesian framework is that the robot is remarkably simple. 
+In the words of \cite{Loredo1994}, these rules make Bayesian inference ``more like integration'' in that it provides a ``collection of tools for finding definitive answers to well-posed problems''. 
+Posing the problem will require subjective knowledge; solving it will not.
 
 
-\section{The basics of probability theory}
+\section{The basics of probability theory}\label{sec:basics}
 
-Here we present the rules of the game.
-I follow very closely (too closely) the presentation in \cite{Hogg2012}.
+Here we present the rules of the game, following very closely (too closely!) the presentation in \cite{Hogg2012}.
 Using Bayesian statistics to analyse data (some might call it doing probabilistic inference) means working with likelihoods, prior probabilities, posterior probabilities and marginalization of nuisance parameters.
 All this will be explained later but the options we have when working with these mathematical objects are strongly constrained by the rules of probability calculus.
 
@@ -148,7 +163,8 @@ All this will be explained later but the options we have when working with these
    On voit, par cet Essai, que la théorie des probabilités n'est, au fond, que le bon sens réduit au calcul;
 \end{fancyquote}
 
-If we have a continuous parameter $a$, and a probability distribution function $p(a)$ for $a$, it must obey the normalization condition
+If we have a continuous parameter $a$, and a probability distribution function $p(a)$ for%
+\footnote{I say \emph{for} instead of \emph{of}, but I promised no philosophy...} $a$, it must obey the normalization condition
 %
 \begin{equation}
    1 = \int p(a) \, da
@@ -295,6 +311,114 @@ Now that we have a set of rules with which we can manipulate our distributions, 
 
 \subsection{The prior}\label{sec:prior}
 
+The dreadful prior, we wish we didn't have to deal with it. 
+But having to specify priors is a good excuse to learn about different probability distributions. 
+See Fig. \ref{fig:distributions}, which shows the general form of many continuous probability distributions.
+
+We can start with the Normal distribution.
+A variable $x$ is normally distributed if its pdf is
+
+\begin{equation}
+  \text{pdf}(x|\mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi}} 
+                              \exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]
+\end{equation}
+
+where $\mu$ and $\sigma$ are the two parameters of the Normal distribution.
+We will use the following notation to say that $x$ follows a Normal distribution:
+%
+\[x \sim \mathcal{N}(\mu, \sigma)\]
+%
+
+The Normal distribution is defined on the real line, so $x$ can take any value between $-\infty$ and $\infty$.
+The parameter $\mu$ is the mean of the distribution and $\sigma$ is the standard deviation.
+Values of $x$ closer to $\mu$ are more probable that those far from $\mu$.
+
+
+The uniform distribution is also quite common
+%
+\[x \sim \mathcal{U}(a, b) \quad \text{if} \quad \text{pdf}(x|a,b) = \frac{1}{a-b} \]
+%
+
+For the uniform distribution, all values between $a$ and $b$ are equally probable.
+The probability that $x<a$ is 0 and the same for $x>b$. These values of $x$ are \emph{impossible}.
+
+
+Let us introduce briefly one more distribution, the \emph{t}-distribution:
+%
+\begin{equation}
+  x \sim t(\nu,\mu,\sigma) \quad \text{if} \quad \text{pdf}(x|\nu, \mu, \sigma) = 
+            \frac{\Gamma(\frac{\nu+1}{2})}{\Gamma(\frac{\nu}{2})\sqrt{\pi\nu}\,\sigma}
+            \left[ 1 + \frac{1}{\nu} \left(\frac{x-\mu}{\sigma}\right)^2 \right]
+                  ^{-\frac{\nu+1}{2}}
+\label{eq:tdistribution}
+\end{equation}
+%
+with the degrees of freedom $\nu$, the mean $\mu$ and the scale $\sigma$ as parameters.
+In Eq. \eqref{eq:tdistribution}, $\Gamma$ is the gamma function.
+
+This distribution looks complicated but I mention it here for one reason: note how in Fig. \ref{fig:distributions}, the normal and \emph{t} distributions look very similar, they are both bell-shaped.
+The distinguishing feature is that the \emph{t}-distribution has \emph{heavier tails}, that is, values of $x$ far from the mean are more probable if $x$ is \emph{t} distributed than if $x$ if normally distributed.
+How heavy the tails are depends on the parameter $\nu$.
+For example, imagine that
+%
+\begin{align}
+  x_1 & \sim \mathcal{N}(0, 1) \\
+  x_2 & \sim t(2, 0, 1)
+\end{align}
+%
+and you obtain 100\,000 random samples from these two distributions. 
+Then you calculate the minimum value of all the samples for $x_1$ and all the samples for $x_2$.
+Will these values be very different?
+%
+\begin{minted}[linenos,
+               numbersep=7pt,
+               gobble=2,
+               frame=lines,
+               framesep=0mm]{python}
+  from scipy.stats import norm, t
+  
+  print min( t(1., loc=0, scale=1).rvs(100000) )
+  print min( norm(loc=0, scale=1).rvs(100000) )
+\end{minted}
+
+They are completely different! By orders of magnitude!
+
+\noindent The \emph{t}-distribution allows for more extreme values.
+This will come in handy when we deal with outliers.
+
+\vskip1em
+Other distributions have different pdfs and different parameters. 
+Wikipedia usually has a lot of information about the most common ones, just search for the names you see in Fig. \ref{fig:distributions}. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{../figs/distributions.png}
+  \caption{Continuous probability distributions. Adapted from \href{http://semanticommunity.info/Data_Science/Doing_Data_Science\#Slide_1_Hubway_Data_Visualization_Challenge:_Spotfire}{here}.}
+  \label{fig:distributions}
+\end{figure}
+
+
+The key concept about priors is to use (some of) these probability distributions to describe our beliefs about the parameters in our models.
+
+\begin{itemize}
+  \item if any value of the parameter seems equally likely but you have an idea of its order of magnitude, try a uniform distribution in a sensible range.
+  \item if one value is somewhat more likely and, again, you know the order of magnitude, try a normal distribution centred in that value.
+  \item if any value is equally likely within a few orders of magnitude, use a log-normal or an exponential distribution. [check!!!]
+  \item if the parameter takes values between 0 and 1, the beta distribution is defined in this interval and can take a wide range of forms, depending on its parameters.
+\end{itemize}
+
+Every time you come up with a prior, you are using your expert knowledge about the problem.
+Don't underestimate this knowledge by trying to set an ``uninformative'' prior at all costs.
+If you are not sure, try a few different priors and see if the results make sense and are consistent. 
+
+The only way in which you can go completely wrong and change the results dramatically is by setting the prior to 0. No amount of data can change a prior which is zero.
+
+
+
+% Finally, if a result is not robust to reasonable changes in the problem specification, this itself should be recognized as important information.  If the answer depends sensitively on something we do not know, then we do not know the answer
+
+
+
 \subsection{The likelihood}\label{sec:likelihood}
 
 The likelihood is a prior.
@@ -312,6 +436,16 @@ It is, instead, what we usually call \emph{the model}.
 And the model is nothing else than a set of assumptions about the data and how they relate to the parameters.
 \textbf{The likelihood provides a (\emph{the}) connection from $\theta$ to $D$}.
 
+% But now comes the part which, conceptually, is harder to understand. 
+% When we write $p(D|\theta,I)$, this is a distribution for the data, given some values for the parameters $\theta$.
+% A ``point'' taken randomly from $p(D|\theta,I)$, corresponds to a random dataset.
+% But the likelihood is sometimes seen instead as a function of the parameters, given the observed dataset. 
+% In this form, the symbol $\mathcal{L}(\theta)$ is often used.
+
+% \begin{itemize}
+%   \item $p(D|\theta,I)$ - distribution for datasets, given $\theta$
+%   \item $\mathcal{L}(\theta)$ - function of 
+% \end{itemize}
 
 
 
@@ -348,30 +482,27 @@ It is probably not the simplest, but it is definitely the most often used.
 \end{itemize}
 \end{quote}
 
-Let's see this in \texttt{Python} code
+\noindent Let's see this in \texttt{Python} code
 
 
 \begin{minted}[linenos,
-               numbersep=5pt,
+               numbersep=7pt,
                gobble=2,
                frame=lines,
-               framesep=2mm]{python}
+               framesep=0mm]{python}
   import numpy as np
   from scipy.stats import norm
   
-  # number of iterations to run MCMC
-  niter = 500
+  niter = 500 # number of iterations
   
   # posterior distribution (the distribution we want to sample from)
-  p = lambda x:norm.pdf(x)
+  p = lambda x: norm.pdf(x)
   
-  # starting point
-  x = [0.5]
+  x = [0.5] # starting point
   
   for step in range(niter):
-     # propose a step
-     d = np.random.randn()
-     
+     d = np.random.randn() # propose a step
+
      # calculate the ratio of posterior probabilities
      alpha = p(x[-1]+d) / p(x[-1])
   
@@ -385,44 +516,12 @@ Let's see this in \texttt{Python} code
            x.append(x[-1])    # reject the new step (stay where we are)
 \end{minted}
 
-This statement requires citation \cite{Smith:2012qr}; this one does too \cite{Smith:2013jd}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean dictum lacus sem, ut varius ante dignissim ac. Sed a mi quis lectus feugiat aliquam. Nunc sed vulputate velit. Sed commodo metus vel felis semper, quis rutrum odio vulputate. Donec a elit porttitor, facilisis nisl sit amet, dignissim arcu. Vivamus accumsan pellentesque nulla at euismod. Duis porta rutrum sem, eu facilisis mi varius sed. Suspendisse potenti. Mauris rhoncus neque nisi, ut laoreet augue pretium luctus. Vestibulum sit amet luctus sem, luctus ultrices leo. Aenean vitae sem leo.
-
-Nullam semper quam at ante convallis posuere. Ut faucibus tellus ac massa luctus consectetur. Nulla pellentesque tortor et aliquam vehicula. Maecenas imperdiet euismod enim ut pharetra. Suspendisse pulvinar sapien vitae placerat pellentesque. Nulla facilisi. Aenean vitae nunc venenatis, vehicula neque in, congue ligula.
-
-Pellentesque quis neque fringilla, varius ligula quis, malesuada dolor. Aenean malesuada urna porta, condimentum nisl sed, scelerisque nisi. Suspendisse ac orci quis massa porta dignissim. Morbi sollicitudin, felis eget tristique laoreet, ante lacus pretium lacus, nec ornare sem lorem a velit. Pellentesque eu erat congue, ullamcorper ante ut, tristique turpis. Nam sodales mi sed nisl tincidunt vestibulum. Interdum et malesuada fames ac ante ipsum primis in faucibus.
-
-%------------------------------------------------
-
-\section*{Section Name}
-
-Cras gravida, est vel interdum euismod, tortor mi lobortis mi, quis adipiscing elit lacus ut orci. Phasellus nec fringilla nisi, ut vestibulum neque. Aenean non risus eu nunc accumsan condimentum at sed ipsum.
-\begin{wrapfigure}{l}{0.4\textwidth} % Inline image example
-\begin{center}
-\includegraphics[width=0.38\textwidth]{fish.png}
-\end{center}
-\caption{Fish}
-\end{wrapfigure}
-Aliquam fringilla non diam sed varius. Suspendisse tellus felis, hendrerit non bibendum ut, adipiscing vitae diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla lobortis purus eget nisl scelerisque, commodo rhoncus lacus porta. Vestibulum vitae turpis tincidunt, varius dolor in, dictum lectus. Aenean ac ornare augue, ac facilisis purus. Sed leo lorem, molestie sit amet fermentum id, suscipit ut sem. Vestibulum orci arcu, vehicula sed tortor id, ornare dapibus lorem. Praesent aliquet iaculis lacus nec fermentum. Morbi eleifend blandit dolor, pharetra hendrerit neque ornare vel. Nulla ornare, nisl eget imperdiet ornare, libero enim interdum mi, ut lobortis quam velit bibendum nibh.
-
-Morbi tempor congue porta. Proin semper, leo vitae faucibus dictum, metus mauris lacinia lorem, ac congue leo felis eu turpis. Sed nec nunc pellentesque, gravida eros at, porttitor ipsum. Praesent consequat urna a lacus lobortis ultrices eget ac metus. In tempus hendrerit rhoncus. Mauris dignissim turpis id sollicitudin lacinia. Praesent libero tellus, fringilla nec ullamcorper at, ultrices id nulla. Phasellus placerat a tellus a malesuada.
-
-%------------------------------------------------
-
-\section*{Conclusion}
-
-Fusce in nibh augue. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In dictum accumsan sapien, ut hendrerit nisi. Phasellus ut nulla mauris. Phasellus sagittis nec odio sed posuere. Vestibulum porttitor dolor quis suscipit bibendum. Mauris risus lectus, cursus vitae hendrerit posuere, congue ac est. Suspendisse commodo eu eros non cursus. Mauris ultrices venenatis dolor, sed aliquet odio tempor pellentesque. Duis ultricies, mauris id lobortis vulputate, tellus turpis eleifend elit, in gravida leo tortor ultricies est. Maecenas vitae ipsum at dui sodales condimentum a quis dui. Nam mi sapien, lobortis ac blandit eget, dignissim quis nunc.
-
-\begin{enumerate}
-\item First numbered list item
-\item Second numbered list item
-\end{enumerate}
-
-Donec luctus tincidunt mauris, non ultrices ligula aliquam id. Sed varius, magna a faucibus congue, arcu tellus pellentesque nisl, vel laoreet magna eros et magna. Vivamus lobortis elit eu dignissim ultrices. Fusce erat nulla, ornare at dolor quis, rhoncus venenatis velit. Donec sed elit mi. Sed semper tellus a convallis viverra. Maecenas mi lorem, placerat sit amet sem quis, adipiscing tincidunt turpis. Cras a urna et tellus dictum eleifend. Fusce dignissim lectus risus, in bibendum tortor lacinia interdum.
 
 %----------------------------------------------------------------------------------------
 %   BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
+\newpage
 \bibliographystyle{unsrt}
 
 \bibliography{/home/joao/phd/bib/zotero_library}
