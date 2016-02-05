@@ -1,3 +1,5 @@
+.*
+
 *.aux
 *.glo
 *.idx
@@ -24,8 +26,13 @@
 *.fdb_latexmk
 *.fls
 *.llt
+*.nav
+*.snm
+*.vrb
 
 
 *.pickle
 
 *.sublime*
+
+scripts/*.png
