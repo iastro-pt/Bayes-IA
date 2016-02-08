@@ -58,7 +58,7 @@ except ImportError:
 	print( "or go to https://github.com/pydata/pandas for more information")
 
 try:
-	import seaborns as sns
+	import seaborn as sns
 except ImportError:
 	print( "Though not strictly necessary, you could try installing 'seaborn'. Run")
 	print( "  pip install seaborn")
