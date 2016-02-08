@@ -50,28 +50,4 @@ PRACTICE
 
 
 
-## Lecture 1
-	- Start with the example from d'Agostini on the meaning of frequentist and Bayesian probabilities
-
-	- Use a simple example to show all the problems with frequentist p-values and confidence intervals
-		. http://www.indiana.edu/~kruschke/articles/Kruschke2013JEPG.pdf
-		. they don't actually depend on the data we have at hand
-		. they are subjective too, in the sense that they depend on termination and other researcher degrees of freedom
-
-	- State the two laws of probability and derive Bayes' theorem from them
-		. explain in extreme detail what every term is
-
-	- The linear regression example
-		. we should start by building a pgm for the problem
-		. then, derive the posterior distribution for the parameters m and b
-		. sample with MCMC
-
-	- The beta-binomial conjugacy 
-		. what does it mean to be a conjugate prior?
-
-	- Build a hierarchical model
-		. maybe use the HARPS offset as an example?
-
-
-
 This work is licensed under a [Attribution-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-sa/4.0/) license.
