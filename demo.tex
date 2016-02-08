@@ -1,0 +1,1015 @@
+% \documentclass[show notes]{beamer}       % print frame + notes
+% \documentclass[show only notes]{beamer}   % only notes
+\documentclass{beamer}              % only frames
+\usepackage{pgfpages}
+
+\setbeameroption{show notes on second screen}
+
+
+\usetheme{m}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage[utf8]{inputenc}
+\usepackage{minted}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+% \usepackage{enumitem}
+
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+
+%%% METADATA %%%
+\title[\Large Bayesian Stats]{\huge data don't speak for themselves}
+\subtitle{a quick introduction to Bayesian statistics}
+\date{Institute of Astrophysics and Space Sciences}
+\author{\large João P. Faria}
+% \institute{Institute of Astrophysics and Space Sciences}
+\titlegraphic{\hfill\includegraphics[height=0.8cm]{figs/IA_logo_vector-cmyk+black-noletters.pdf}}
+
+
+%%%%% TIKZ %%%%%
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width=4cm, draw=black, fill=blue!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, text width=1.5cm, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+
+
+
+
+\begin{document}
+
+
+\maketitle
+%
+\note{
+      Welcome everyone! Thank you for coming.
+
+      We had a few courses about Bayesian statistics in the past given by Michael Bazot and Alex and by Pascal Bordé.
+
+      I decided to do this course because that was already 2 years ago, 
+      and because those courses did not focus on learning statistics from intuition.
+
+      I think that's important, and whether or not I'll be able to do it myself I'll leave for you to judge.
+
+      Just to mention that the title is only in part a joke, \\as we will see by the end.
+      }
+
+
+  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \frametitle{Disclaimer}
+  % \setbeamertemplate{section in toc}[sections numbered]
+  % \tableofcontents[hideallsubsections]
+
+  I'm not a statistician.
+
+  I never gave this course before.
+
+  I borrowed (heavily) from material presented in the references.
+
+  But, unless otherwise noted, all opinions are my own.
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{Outline}
+
+  \note<1>{
+          This is the outline that I sent to Carlos and that he sent to you when announcing the course.
+
+          I hadn't prepared the course yet when I wrote this\\
+          so there's a few things that I won't have time to cover.
+          }
+
+  \begin{itemize}
+    \item main differences between frequentist and Bayesian statistics
+    \begin{itemize}
+      \only<1>{\item[-] problems with p-values, confidence intervals and\\ null hypothesis testing}
+      \only<2>{\item[-] \sout{problems with p-values, confidence intervals and\\ null hypothesis testing}}
+    \end{itemize}
+    \item the basic rules of probability theory
+    \item how to assign probability distributions
+    \begin{itemize}
+     \item[-] the role of priors
+     \item[-] the likelihood
+    \end{itemize}
+    \only<1>{\item the simplest models in Bayesian statistics}
+    \only<2>{\item {\color{red} the simplest models in Bayesian statistics}}
+    \begin{itemize}
+     \only<1>{\item[-] linear regression}
+     \only<2>{\item[-] {\color{red} linear regression}}
+
+     \only<1>{\item[-] beta-binomial model}
+     \only<2>{\item[-] \sout{beta-binomial model}}
+     
+     \only<1>{\item[-] hierarchical models}
+     \only<2>{\item[-] {\color{red} hierarchical models}}
+    \end{itemize}
+
+    \only<1>{\phantom{placeholder}}
+    \only<2>{\item MCMC}
+  \end{itemize}
+
+\end{frame}
+%
+\note{
+      I will only speak very briefly about frequentist statistics\\
+      I'll speak about p-values and confidence intervals only if someone asks.
+
+      These simple models in red I will only discuss in the practical classes,\\
+      but not the beta-binomial model
+
+      And I will speak about MCMC today.
+      }
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\plain{\alert{Q/A}}
+\note{
+      Of course you can ask whatever questions you want,\\
+      but I will put up these Q/A slides at every section\\
+      and I would ask you to save your questions until one of these shows up.
+
+      So... questions already?
+      }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Introduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \frametitle{brief historical sketch}
+
+  \begin{itemize}[<+->]
+    \item statistical inference was invented because of astronomy\\
+      {\footnotesize (this claim is not based on an in-depth search)}
+
+    \note<.>{
+            Let's start with a bit of history.
+
+            I think it's fair to say that statistics started with people trying to solve astronomy problems.
+
+            the initial concerns were about observational errors and how to combine observations by different people
+            }
+
+    \item Tycho Brahe, Galileo, Legendre, Laplace, Gauss \\used and developed statistical methods\\
+
+    \note<.>{
+            this was formalised (maybe most famously) by Gauss
+
+            but many great names worked on predicting the position of astronomical objects, for example\\
+
+            they were using essentially Bayesian methods.
+            % the method of least-squares was invented at this time
+            }
+
+    
+    \item $\sim$ 20th century, astronomers focused on least-squares techniques, and heuristic procedures\\
+
+    \note<.>{
+            in the 20th century, statistics turned its attention to biological and social sciences
+
+            and it kept developing but
+
+            new statistical concepts such as maximum likelihood emerged only slowly in astronomy
+            }    
+
+    
+    \item ``astrostatistics'' emerged in the late 1990s -- collaborations between astronomers and statisticians\\
+          {\footnotesize names like Babu, Feigelson, Gregory, Hobson}
+
+    \note<.>{
+            in the late 1990s some collaborations between astronomers and statisticians started emerging\\
+
+            mainly problems in cosmology and image reconstruction
+            }  
+    % \pause
+    
+    \item statistics today is mostly Bayesian\\
+          {\footnotesize (many) astronomers are (very) sceptical of (sophisticated) statistics}
+
+    \note<.>{
+            and today we're at this stage where
+
+            most research in statistics is Bayesian
+
+            and I think it's still fair to say that many astronomers have this inherent, \emph{a priori} scepticism 
+            for statistical analyses
+
+            which is because of many different reasons, one of which is certainly lack of training
+            }
+
+  \end{itemize}
+  
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{frequentist and Bayesian}
+
+
+
+  \begin{minipage}[t][0.2\textheight][t]{\textwidth}
+    Consider $n$ independent measurements of the same quantity, \\under identical conditions
+
+    Calculate their mean $\bar{x}$ and standard deviation $\sigma$
+  \end{minipage} \\
+
+  \begin{minipage}[t][0.2\textheight][t]{\textwidth}
+    \only<2->{
+      \begin{equation*}
+        \mu = \bar{x} \pm \frac{\sigma}{\sqrt{n}}
+      \end{equation*}
+      }
+  \end{minipage}
+
+  \begin{minipage}[t][0.2\textheight][t]{\textwidth}
+
+    \begin{minipage}[t]{0.48\textwidth}
+      \only<3-4>{
+        \small
+        what you think this means:
+        \begin{equation*}
+        p(\bar{x} - \frac{\sigma}{\sqrt{n}} \leq \mu \leq \bar{x} + \frac{\sigma}{\sqrt{n}}) = 68\%
+        \end{equation*}
+      }
+      \only<5->{
+        \small
+        what you want it to mean:
+        \color{red}
+        \begin{equation*}
+        p(\bar{x} - \frac{\sigma}{\sqrt{n}} \leq \mu \leq \bar{x} + \frac{\sigma}{\sqrt{n}}) = 68\%
+        \end{equation*}
+      }
+    \end{minipage}%
+    \hfill
+    %
+    \begin{minipage}[t]{0.48\textwidth}
+      \only<4->{
+        \small
+        what it actually means:
+        \begin{equation*}
+        p(\mu - \frac{\sigma}{\sqrt{n}} \leq \bar{x} \leq \mu + \frac{\sigma}{\sqrt{n}}) = 68\%
+        \end{equation*}
+      }
+    \end{minipage}
+
+  \end{minipage}
+
+  \vfill
+\end{frame}
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}[fragile]
+%   \frametitle{frequentist and Bayesian}
+%   \scriptsize
+%   Frequentist methods
+%   \begin{itemize}
+%     \item are usable and useful in simple, idealized problems
+%     \item represent the most proscribed special cases of probability theory, because they presuppose conditions [...] that are hardly ever met in real problems
+%     \item provide no technical means to eliminate nuisance parameters or to take prior information into account
+%   \end{itemize}
+
+%   All of these defects are corrected by use of Bayesian methods [which]
+%   \begin{itemize}
+%     \item determine the optimal estimators and algorithms automatically
+%     \item take into account prior information and [allow for] nuisance parameters
+%     \item being exact, [...] do not break down -- but continue to yield reasonable results -- in extreme cases
+%     \item enable us to solve problems of far greater complexity than can be discussed at all in frequentist terms.
+%   \end{itemize}
+
+%   \raggedleft
+%   E. T. Jaynes, Probability Theory
+
+% \end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{frequentist and Bayesian}
+
+  Here is the main difference:\\[-0.1in]
+
+  \begin{itemize}
+    \item Frequentists assign a probability to what is \underline{\emph{random}} \\[0.2in]
+    \item Bayesians assign a probability to what is \underline{\emph{unknown}}
+  \end{itemize}
+  \vfill
+
+\end{frame}
+
+
+\begin{comment}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bayesian statistics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{the rules of probability}
+\end{frame}
+\note{Probability theory provides a \emph{calculus} to deal with probabilities. 
+      That is, to deal with numbers.
+      
+      It doesn't tell you what those numbers are or what they mean!
+
+      So let's focus instead on the rules of \textbf{probability density functions}
+      }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{the rules of probability density functions}
+
+  \only<2->{
+    normalisation
+    \begin{equation*}
+      1 = \int p(a) da  
+    \end{equation*}
+
+    factorisation of joint pdfs
+    \begin{align*}
+      p(a,b) = p(a) \, p(b|a) \\
+      p(a,b) = p(b) \, p(a|b)
+    \end{align*}
+
+    Bayes' theorem
+    \begin{equation*}
+      p(a|b) = \frac{p(a) \, p(b|a)}{p(b)}
+    \end{equation*}
+
+    marginalisation
+    \begin{equation*}
+      p(a) = \int p(a,b) db
+    \end{equation*}
+  }
+
+\end{frame}
+\note{These are the simple rules of probability calculus.
+      
+      A pdf will always normalise to 1.
+
+      If you have a joint pdf for two ``things'' a and b, they factorise like this.
+      From that you directly get Bayes' theorem.
+      There is no discussion on whether or not Bayes' theorem is correct. It is.
+      There \emph{is} discussion on what p(a) actually means!
+
+      Another very important rule is marginalisation by which you can integrate out some parameters.
+      }
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{the rules of probability density functions}
+
+  normalisation
+  \begin{equation*}
+    1 = \int p(a|c) da  
+  \end{equation*}
+
+  factorisation of joint pdfs
+  \begin{align*}
+    p(a,b|c) = p(a|c) \, p(b|a,c) \\
+    p(a,b|c) = p(b|c) \, p(a|b,c)
+  \end{align*}
+
+  Bayes' theorem
+  \begin{equation*}
+    p(a|b,c) = \frac{p(a|c) \, p(b|a,c)}{p(b|c)}
+  \end{equation*}
+
+  marginalisation
+  \begin{equation*}
+    p(a|c) = \int p(a,b|c) db
+  \end{equation*}
+
+\end{frame}
+\note{These all work exactly the same if you have a pdf conditioned on a variable c.}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{Bayes theorem}
+  
+  \only<1>{
+    \vskip1cm
+    \begin{equation*}
+      p(a|b,c) = \frac{p(a|c) \, p(b|a,c)}{p(b|c)}
+    \end{equation*}
+  }
+
+  \only<2>{
+    \vskip1cm
+    \begin{equation*}
+      p(\theta|b,c) = \frac{p(\theta|c) \, p(b|\theta,c)}{p(b|c)}
+    \end{equation*}
+  } 
+
+  \only<3>{
+    \vskip1cm
+    \begin{equation*}
+      p(\theta|D,c) = \frac{p(\theta|c) \, p(D|\theta,c)}{p(D|c)}
+    \end{equation*}
+  } 
+
+  \only<4>{
+    \vskip1cm
+    \begin{equation*}
+      p(\theta|D,\mathcal{I}) = \frac{p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I})}{p(D|\mathcal{I})}
+    \end{equation*}
+  }
+
+  \only<5->{
+    \vskip1cm
+    \begin{equation*}
+      p(\theta|D,\mathcal{I}) = \frac{p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I})}{p(D|\mathcal{I})}
+    \end{equation*}
+
+    $\theta$ - parameters
+
+    D - data
+
+    $\mathcal{I}$ - assumed information (or hypotheses)
+  }  
+
+  \only<6->{
+    \begin{minipage}[t]{0.48\textwidth}
+        \color{red}
+        \small
+        \begin{equation*}
+        p(\bar{x} - \frac{\sigma}{\sqrt{n}} \leq \mu \leq \bar{x} + \frac{\sigma}{\sqrt{n}}) = 68\%
+        \end{equation*}
+    \end{minipage}%
+    \hfill
+    %
+    \begin{minipage}[t]{0.48\textwidth}
+        \small
+        \begin{equation*}
+        p(\mu - \frac{\sigma}{\sqrt{n}} \leq \bar{x} \leq \mu + \frac{\sigma}{\sqrt{n}}) = 68\%
+        \end{equation*}
+    \end{minipage}
+  } 
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\plain{\alert{Q/A} \\ rules of probability}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Assigning probabilities}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{assigning prior probabilities}
+  
+  \only<1>{
+    \vskip1cm
+    \begin{equation*}
+      \text{posterior} = \frac{\color{red}\text{prior} \color{black} \,\times\, \text{likelihood}}{evidence}
+    \end{equation*}
+  }
+
+  \only<2>{
+    \vskip1cm
+    \begin{equation*}
+      \text{posterior} = \frac{\color{red}p(\theta|\mathcal{I}) \color{black} \,\times\, \text{likelihood}}{evidence}
+    \end{equation*}
+  }
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{assigning prior probabilities}
+
+  \centering 
+  the Gaussian distribution
+
+  \includegraphics[width=0.7\linewidth,trim=0 20 0 0, clip]{figs/gaussian_dist.png}
+  
+  \begin{equation*}
+    x \sim \mathcal{N} (\mu,\sigma^2)
+  \end{equation*}
+  \begin{equation*}
+    \text{pdf}(x|\mu,\sigma) = \frac{1}{\sigma \sqrt{2\pi}} \exp \left[- \frac{(x-\mu)^2}{2\sigma^2} \right]
+  \end{equation*}
+  \vfill
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{assigning prior probabilities}
+
+  \centering 
+  the uniform distribution
+
+  \includegraphics[width=0.7\linewidth,trim=0 20 0 0, clip]{figs/uniform_dist.png}
+  
+  \begin{equation*}
+    x \sim \mathcal{U} (a, b)
+  \end{equation*}
+  \begin{equation*}
+    \text{pdf}(x|a,b) = \frac{1}{b-a}
+  \end{equation*}
+  \vfill
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{assigning prior probabilities}
+
+  \centering 
+  the reciprocal (Jeffreys') distribution
+
+  \includegraphics[width=0.7\linewidth,trim=0 10 0 0, clip]{figs/reciprocal_dist.png}
+  
+  \begin{equation*}
+    x \sim \mathcal{J} (a, b)
+  \end{equation*}
+  \begin{equation*}
+    \text{pdf}(x|a,b) = \frac{1}{x \left[\log(b) - \log(a) \right]}
+  \end{equation*}
+  \vfill
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{assigning prior probabilities}
+
+  \centering 
+  the Beta distribution
+
+  \only<1>{
+  \includegraphics[width=0.7\linewidth,trim=0 10 0 0, clip]{figs/beta_dist.png}
+  }
+  \only<2>{
+  \includegraphics[width=0.7\linewidth,trim=0 10 0 0, clip]{figs/beta2_dist.png}
+  }
+  
+  \begin{equation*}
+    x \sim \mathcal{B} (\alpha, \beta)
+  \end{equation*}
+  \begin{equation*}
+    \text{pdf}(x|a,b) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) \Gamma(\beta)} 
+                         \: x^{\alpha-1} \, (1-x)^{\beta-1}
+  \end{equation*}
+  \vfill
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{assigning prior probabilities}
+
+  Use your Python:
+
+  \begin{minted}[linenos,
+               numbersep=7pt,
+               gobble=2,
+               frame=lines,
+               framesep=0mm,
+               fontsize=\footnotesize]{python}
+  from scipy.stats import *
+  
+  norm(loc=0, scale=1).pdf(0.1)      # evaluate pdf at x=0.1
+  norm(loc=0.5, scale=0.2).rvs(100)  # get 100 random samples
+
+  uniform().logpdf(0.5)              # evaluate log pdf at x=0.5
+
+  beta(a=0.5, b=0.5).interval(1)     # the support (0, 1)
+  \end{minted}
+
+  there are tons of distributions in \texttt{Scipy}!!
+  \vfill
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{assigning prior probabilities}
+
+  if you have two parameters and they are independent
+
+  \begin{equation*}
+    p(\theta_1, \theta_2|\mathcal{I}) = p(\theta_1|\mathcal{I}) \, p(\theta_2|\mathcal{I})
+  \end{equation*}
+
+  \begin{equation*}
+    \log p(\theta_1, \theta_2|\mathcal{I}) = \log p(\theta_1|\mathcal{I}) + \log p(\theta_2|\mathcal{I})
+  \end{equation*}
+  \vfill
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{assigning prior probabilities}
+
+  if you have $N$ parameters and they are independent
+
+  \begin{equation*}
+    p(\theta_1, \ldots, \theta_N|\mathcal{I}) = \prod p(\theta_i|\mathcal{I})
+  \end{equation*}
+
+  \begin{equation*}
+    \log p(\theta_1, \ldots, \theta_N|\mathcal{I}) = \sum \log p(\theta_i|\mathcal{I})
+  \end{equation*}
+  \vfill
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{What is ``prior information''}
+  A mix of 
+  \begin{itemize}
+    \item[] substantive knowledge,
+    \item[] scientific conjectures, 
+    \item[] statistical properties, 
+    \item[] analytical convenience, 
+    \item[] disciplinary tradition,
+    \item[] computational tractability.
+  \end{itemize}
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{likelihood (aka the sampling distribution)}
+  
+  \only<1>{
+    \vskip1cm
+    \begin{equation*}
+      \text{posterior} = \frac{\text{prior} \,\times\, \color{red}\text{likelihood}\color{black}}{evidence}
+    \end{equation*}
+  }
+
+  \only<2>{
+    \vskip1cm
+    \begin{equation*}
+      \text{posterior} = \frac{\text{prior} \,\times\, \color{red}p(D|\theta, \mathcal{I}) \color{black}}{evidence}
+    \end{equation*}
+  }
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \frametitle{likelihood}
+
+  \begin{columns}[T] % align columns
+  \begin{column}{.3\textwidth}
+  \scriptsize
+  $\mathcal{I}$:\\[.5em]
+  \color{blue} $~f(x) = A_1 + A_2\,x + A_3\,x^2$
+  \color{black} $~x_1, \ldots, x_n$\\
+  $~\sigma$\\[2em]
+   $\theta = \{A_1, A_2, A_3\}$\\[2em]
+   $p(D|\theta, \mathcal{I}) \sim \mathcal{N}(f(x), \sigma)$
+  \end{column}%
+  \hfill%
+  \begin{column}{.7\textwidth}
+
+  % \hskip2em
+  \foreach[count=\i] \x in {1,2,...,10}
+  {
+    \only<\i>{
+      \includegraphics[height=0.85\textheight,trim=22 0 0 0, clip]{figs/likelihood_\x.pdf}
+    }
+  }
+  \end{column}%
+  \end{columns}
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \frametitle{likelihood}
+
+  \begin{columns}[T] % align columns
+  \begin{column}{.3\textwidth}
+  \scriptsize
+  $\mathcal{I}$:\\[.5em]
+  \color{blue} $~f(x) = A_1 + A_2\,x + A_3\,x^2$
+  \color{black} $~x_1, \ldots, x_n$\\
+   $~\sigma_1, \ldots, \sigma_n$\\[2em]
+   $\theta = \{A_1, A_2, A_3\}$\\[2em]
+   $p(D_i|\theta, \mathcal{I}) \sim \mathcal{N}(f(x), \sigma_i)$
+  \end{column}%
+  \hfill%
+  \begin{column}{.7\textwidth}
+
+  % \hskip2em
+  \foreach[count=\i] \x in {1,2,...,9}
+  {
+    \only<\i>{
+      \includegraphics[height=0.85\textheight,trim=22 0 0 0, clip]{figs/likelihood_heteroskedastic_\x.pdf}
+    }
+  }
+  \end{column}%
+  \end{columns}
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[label=likelihood-expression]
+  \frametitle{likelihood}
+
+  \raggedleft
+  \includegraphics[width=0.4\textwidth,trim=22 0 0 0, clip]{figs/likelihood_heteroskedastic_8.pdf}
+
+  \raggedright
+  \vskip-5em
+  \footnotesize
+  \begin{align*}
+    p(D|\theta,I) &= \prod_{i=1}^N p(D_i|\theta,I) \\
+                  &= \prod_{i=1}^N \mathcal{N}_{\text{pdf}}(d_i| f(x_i), \sigma_i) \\
+                  &= \prod_{i=1}^N \frac{1}{\sigma_i \sqrt{2\pi}} 
+                             \exp \Bigg\{ - \frac{ \left[d_i-f(x_i)\right]^2}{2\sigma_i^2}\Bigg\}\\
+                  &= (2\pi)^{-N/2} 
+                          \left(\prod_{i=1}^N  \frac{1}{\sigma_i} \right)
+                          \exp \Bigg\{-\frac{1}{2} \sum_{i=1}^N \frac{ \left[d_i-f(x_i)\right]^2}{2\sigma_i^2} \Bigg\}
+  \end{align*}
+
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{likelihood}
+
+  % \centering
+  the likelihood for a fixed dataset is a function of the parameters
+
+  \begin{columns}[T] % align columns
+  \begin{column}{.7\textwidth}
+    \foreach[count=\i] \x in {1,3}
+    {
+      \only<\i>{
+        \includegraphics[height=0.8\textheight,trim=22 0 0 0, clip]{figs/likelihood_f\x.png}
+      }
+    }
+  \end{column}%
+  \hfill%
+  \begin{column}{.3\textwidth}
+  \vskip1in
+  fixed D, \\
+  changing $\theta$\\
+  changing $f(x)$\\[2em]
+  \only<1>{higher likelihood}
+  \only<2>{lower likelihood}
+
+  \end{column}%
+  \end{columns}
+
+\end{frame}
+
+
+% \againframe{likelihood-expression}
+
+
+% \begin{frame}
+%   \frametitle{likelihood (aka the sampling distribution)}
+
+%   What to choose as the sampling distribution?
+
+%   \begin{itemize}
+%     \item 90\% of the time you can use a Gaussian distribution
+%     \item 
+%   \end{itemize}
+% \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\plain{\alert{Q/A} \\ priors and likelihood}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% \begin{frame}{A Bayesian flowchart}
+%   \input{flowchart}
+% \end{frame}
+
+
+\begin{frame}
+  \frametitle{now what?}
+
+  We have a prior for the parameters, $p(\theta|\mathcal{I})$\\
+  We have a likelihood, $p(D|\theta, \mathcal{I})$
+
+  \centering
+  \begin{equation*}
+    p(\theta|D,\mathcal{I}) \propto p(\theta|\mathcal{I}) \, p(D|\theta,\mathcal{I})
+  \end{equation*}
+  can we just multiply them and be done with it?
+
+  % \pause
+  \raggedright
+  \begin{itemize}
+    \item in simple cases, yes\\
+    {\scriptsize (one parameter, conjugate priors, analytical form of posterior is known)}
+
+    \item otherwise we can \textbf{sample} from the posterior\\
+    {\scriptsize no limit on number of parameters, no restrictions on priors,} \\
+    {\scriptsize but slower because it is numerical instead of analytical}
+
+  \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{how to sample from a distribution}
+
+\begin{columns}
+    \begin{column}{0.7\textwidth}
+        \begin{itemize}
+          \item<1-> \alert<2>{inverse cdf method}\\
+            {\scriptsize the inverse cumulative distribution function \\[-0.3em] transforms from U(0,1) to p(y)}
+          \item<1-> \alert<3>{rejection sampling}\\
+            {\scriptsize samples from a simple distribution $k q(z)$\\[-0.3em] reject if they fall in the grey area}
+          \item<1-> \alert<4-5>{MCMC}\\
+            {\scriptsize build a Markov chain with $p(\theta)$ \\[-0.3em] as the target distribution}\\
+            \only<1-4>{\phantom{{\scriptsize placeholder}}}
+            \only<5>{{\scriptsize still works for many parameters\\only need to be able to evaluate $p(\theta)$}}
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.3\textwidth}
+        \only<2>{\includegraphics[width=\textwidth]{figs/sampling_method_1.png}}
+        \only<3>{\includegraphics[width=1.1\textwidth]{figs/sampling_method_2.png}}
+        \only<4-5>{\includegraphics[width=1.1\textwidth]{figs/sampling_method_3.png}}
+    \end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{MCMC step-by-step}
+
+
+% \foreach[count=\i] \x in {1,2,...,10,100,200,500,1000,5000}
+% {
+%   \only<\i>{
+%     \includegraphics[width=\textwidth]{scripts/step\x.png}
+%   }
+% }
+
+  
+\end{frame}
+
+
+\end{comment}
+
+
+\begin{frame}{Blocks}
+  Three different block environments are pre-defined and may be styled with an
+  optional background color.
+
+  \begin{columns}[T,onlytextwidth]
+    \column{0.5\textwidth}
+      \begin{block}{Default}
+        Block content.
+      \end{block}
+
+      \begin{alertblock}{Alert}
+        Block content.
+      \end{alertblock}
+
+      \begin{exampleblock}{Example}
+        Block content.
+      \end{exampleblock}
+
+    \column{0.5\textwidth}
+
+      \metroset{block=fill}
+
+      \begin{block}{Default}
+        Block content.
+      \end{block}
+
+      \begin{alertblock}{Alert}
+        Block content.
+      \end{alertblock}
+
+      \begin{exampleblock}{Example}
+        Block content.
+      \end{exampleblock}
+
+  \end{columns}
+\end{frame}
+\begin{frame}{Math}
+  \begin{equation*}
+    e = \lim_{n\to \infty} \left(1 + \frac{1}{n}\right)^n
+  \end{equation*}
+\end{frame}
+\begin{frame}{Line plots}
+  \begin{figure}
+    \begin{tikzpicture}
+      \begin{axis}[
+        mlineplot,
+        width=0.9\textwidth,
+        height=6cm,
+      ]
+
+        \addplot {sin(deg(x))};
+        \addplot+[samples=100] {sin(deg(2*x))};
+
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+\begin{frame}{Bar charts}
+  \begin{figure}
+    \begin{tikzpicture}
+      \begin{axis}[
+        mbarplot,
+        xlabel={Foo},
+        ylabel={Bar},
+        width=0.9\textwidth,
+        height=6cm,
+      ]
+
+      \addplot plot coordinates {(1, 20) (2, 25) (3, 22.4) (4, 12.4)};
+      \addplot plot coordinates {(1, 18) (2, 24) (3, 23.5) (4, 13.2)};
+      \addplot plot coordinates {(1, 10) (2, 19) (3, 25) (4, 15.2)};
+
+      \legend{lorem, ipsum, dolor}
+
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+\begin{frame}{Quotes}
+  \begin{quote}
+    Veni, Vidi, Vici
+  \end{quote}
+\end{frame}
+
+\begin{frame}{References}
+  Some references to showcase [allowframebreaks] \cite{Schneider2015,Santos2003,Figueira2014a,Lillo-Box2015a}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Summary}
+
+  Get the source of this theme and the demo presentation from
+
+  \begin{center}\url{github.com/matze/mtheme}\end{center}
+
+  The theme \emph{itself} is licensed under a
+  \href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+  Attribution-ShareAlike 4.0 International License}.
+
+  \begin{center}\ccbysa\end{center}
+
+\end{frame}
+
+
+% \plain{Questions?}
+\plain{\alert{Q/A} \\ everything}
+
+
+\begin{frame}[allowframebreaks]
+  \frametitle{References}
+  \bibliography{/home/joao/phd/bib/zotero_library}
+  \bibliographystyle{abbrv}
+\end{frame}
+
+
+\end{document}
