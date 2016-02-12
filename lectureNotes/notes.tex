@@ -678,7 +678,7 @@ So their product will also be smaller, and therefore the likelihood of the full 
     from scipy.stats import norm
     from numpy import sum
 
-    def likelihood(t,v,sigma,P,K,e,w,X):
+    def log_likelihood(t,v,sigma,P,K,e,w,X):
       # t, v and sigma are arrays
       # P, K, e, w, X are floats
 
@@ -694,6 +694,12 @@ So their product will also be smaller, and therefore the likelihood of the full 
 % subsubsection an_example (end)
 
 
+\vskip1em
+\begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
+   What would you have to change in the \texttt{log\_likelihood} function in order to use a Student-\emph{t} distribution instead of a Gaussian?
+   Would that help? If yes, in which cases and why?
+\end{bclogo}
+
 
 
 \newpage
@@ -706,6 +712,9 @@ We will write the code for our own MCMC in the practical classes.
 If that is enough for you to \emph{understand} it, skip the next section.
 But if you want to know \emph{why} it works, carry on reading.
 
+\subsection{Why does MCMC work?}
+
+  \ldots
 
 \subsection{A basic MCMC implementation}
 
