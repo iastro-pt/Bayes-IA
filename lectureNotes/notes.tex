@@ -24,7 +24,7 @@
 \usepackage{draftwatermark}
 \SetWatermarkText{draft}
 % \SetWatermarkScale{5}
-\SetWatermarkColor[gray]{0.8}
+\SetWatermarkColor[gray]{0.87}
 
 
 \usepackage[utf8]{inputenc}
@@ -35,7 +35,7 @@
 \usepackage{amsmath}
 \usepackage[tikz]{bclogo}
 \usepackage{minted}
-
+\usepackage{subcaption}
 % \setsansfont{Calibri}
 % \setmonofont{Consolas}
 
@@ -336,11 +336,22 @@ Values of $x$ closer to $\mu$ are more probable that those far from $\mu$.
 
 The uniform distribution is also quite common
 %
-\[x \sim \mathcal{U}(a, b) \quad \text{if} \quad \text{pdf}(x|a,b) = \frac{1}{a-b} \]
+\begin{equation}
+x \sim \mathcal{U}(a, b) \quad \text{if} \quad \text{pdf}(x|a,b) = \frac{1}{a-b}
+\end{equation}
 %
 
 For the uniform distribution, all values between $a$ and $b$ are equally probable.
 The probability that $x<a$ is 0 and the same for $x>b$. These values of $x$ are \emph{impossible}.
+
+
+Another distribution which might come in handy is the reciprocal distribution (it is not shown in Fig. \ref{fig:distributions}):
+%
+\begin{equation}\label{eq:reciprocal}
+x \sim \mathcal{R}(a, b) \quad \text{if} \quad \text{pdf}(x|a,b) = \frac{1}{x\left[\log(b) - \log(a) \right]}
+\end{equation}
+%
+where $a$ and $b$ are the lower and upper bounds of the support (note that $\log$ is the natural logarithm, sometimes denoted as $\ln$).
 
 
 Let us introduce briefly one more distribution, the \emph{t}-distribution:
@@ -409,14 +420,124 @@ The key concept about priors is to use (some of) these probability distributions
 
 Every time you come up with a prior, you are using your expert knowledge about the problem.
 Don't underestimate this knowledge by trying to set an ``uninformative'' prior at all costs.
-If you are not sure, try a few different priors and see if the results make sense and are consistent. 
+If you are not sure, try a few different priors and see if the results make sense and are consistent.
+If you reach different conclusions by changing the priors, mention this when you write your paper.
 
-The only way in which you can go completely wrong and change the results dramatically is by setting the prior to 0. No amount of data can change a prior which is zero.
+The only way in which you can go completely wrong and change the results dramatically is by setting the prior to 0. 
+No amount of data can change a prior which is zero.
 
 
+\vskip1em
+\begin{bclogo}[logo=\bclampe, couleur=blue!15, couleurBord=black ,couleurBarre=blue!15]{ think about it}
+   If the prior distribution is 0, the posterior distribution is 0, independent of the likelihood.
+   This reflects a very strong assumption.
+\end{bclogo}
 
 % Finally, if a result is not robust to reasonable changes in the problem specification, this itself should be recognized as important information.  If the answer depends sensitively on something we do not know, then we do not know the answer
 
+
+\subsubsection{An example} % (fold)
+\label{ssub:an_example}
+
+  Let's try to write a \texttt{Python} code to calculate the prior in a simple example.
+
+  First, we state some of the information that is included in $\mathcal{I}$.
+  The radial-velocity signal induced in a star by an orbiting planet depends
+
+  \begin{itemize}
+    \item on the orbital period, $P$
+    \item on the semi-amplitude, $K$
+    \item on the eccentricity, $e$
+    \item on the argument of periastron, $\omega$
+    \item on the phase of periastron, $\chi$
+  \end{itemize}
+
+  and we know both the units and the appropriate ranges for most of these parameters.
+  For some parameters, like the orbital period and semi-amplitude, we may not be completely sure about the allowed ranges, 
+  but we can still make some informed guesses based on our knowledge of physics and astronomy.
+
+  What about the mathematical forms of the priors. Well, we can start by dividing the parameters into two classes: location and scale parameters.
+  The semi-amplitude is clearly a scale parameter as it does not matter if we measure it in $m\,s^{-1}$, $km\,s^{-1}$, or any other velocity unit. 
+  If we want our prior to be \emph{scale-invariant}, then an appropriate distribution to use is the reciprocal distribution of Eq. \eqref{eq:reciprocal}.
+  The same can be said for the orbital period, which can be measured in days, seconds, months, etc.
+
+  The argument of periastron and phase of periastron are angles that place the planet's orbit in the three-dimensional space.
+  Angles can be measured with respect to an arbitrary direction, so these are location parameters. 
+  We don't care if our parameter is defined as $\omega$ or as $\omega'=\omega+\pi$.
+  An appropriate prior here is the uniform prior. 
+
+  It's harder to justify that the eccentricity is also a location parameter.
+  But in any case we know that, for an elliptical orbit, it should take values between 0 and 1.
+  If we don't know much more (though sometimes we do, see \cite{Kipping2013}) we can go with a uniform prior for $e$ as well.
+
+  So, in summary:
+
+  \begin{itemize}
+    \item[] orbital period         \hfill $p(P|\mathcal{I}) \sim \mathcal{J}(1, 1000)$ days
+    \item[] semi-amplitude         \hfill $p(K|\mathcal{I}) \sim \mathcal{J}(0.1, 100)$ ms$^{-1}$
+    \item[] eccentricity           \hfill $p(e|\mathcal{I}) \sim \mathcal{U}(0, 1)$
+    \item[] argument of periastron \hfill $p(\omega|\mathcal{I}) \sim \mathcal{U}(0, 2\pi)$
+    \item[] phase of periastron    \hfill $p(\chi|\mathcal{I}) \sim \mathcal{U}(0, 2\pi)$
+  \end{itemize}
+  %
+  and we can further assume that these parameters are independent, so their joint prior distribution
+  is the product of the individual priors
+  %
+  \begin{equation}
+    p(P,K,e,\omega,\chi|\mathcal{I}) = p(P|\mathcal{I}) \, p(K|\mathcal{I}) \, p(e|\mathcal{I}) \, p(\omega|\mathcal{I}) \, p(\chi|\mathcal{I})
+  \end{equation}
+
+  Let's write this in \texttt{Python}, using the distributions from \texttt{Scipy}.
+  We want a function \texttt{prior(P,K,e,w,X)} that returns the value of the prior pdf, given values of the parameters.
+
+  %
+  \begin{minted}[linenos,
+                 numbersep=7pt,
+                 gobble=2,
+                 frame=lines,
+                 framesep=0mm]{python}
+    from scipy.stats import *
+    from numpy import product
+
+    def prior(P,K,e,w,X):
+      prior_P = reciprocal(a=1,b=1000).pdf(P)
+      prior_K = reciprocal(a=0.1,b=100).pdf(K)
+      prior_e = uniform().pdf(e)
+      prior_w = uniform(scale=2*pi).pdf(w)
+      prior_X = uniform(scale=2*pi).pdf(X)
+
+      return product([prior_P, prior_K, prior_e, prior_w, prior_X])
+  \end{minted}
+
+
+  This will work in most cases, but we are in danger of underflowing: multiplying small numbers can lead to \emph{very} small numbers.
+  So it might be better to work with logarithms:
+  %
+  \begin{minted}[linenos,
+                 numbersep=7pt,
+                 gobble=2,
+                 frame=lines,
+                 framesep=0mm]{python}
+    from scipy.stats import *
+    from numpy import sum
+
+    def log_prior(P,K,e,w,X):
+      log_prior_P = reciprocal(a=1,b=1000).logpdf(P)
+      log_prior_K = reciprocal(a=0.1,b=100).logpdf(K)
+      log_prior_e = uniform().logpdf(e)
+      log_prior_w = uniform(scale=2*pi).logpdf(w)
+      log_prior_X = uniform(scale=2*pi).logpdf(X)
+
+      return sum([prior_P, prior_K, prior_e, prior_w, prior_X])
+  \end{minted}
+
+  \textbf{Note:} the functions defined above are probably not the most efficient way to calculate the prior. 
+  But they are certainly very readable!
+  If ``future-you'' will understand the code ``present-you'' wrote, that's a good thing!
+
+
+
+% subsubsection an_example (end)
 
 
 \subsection{The likelihood}\label{sec:likelihood}
@@ -436,19 +557,146 @@ It is, instead, what we usually call \emph{the model}.
 And the model is nothing else than a set of assumptions about the data and how they relate to the parameters.
 \textbf{The likelihood provides a (\emph{the}) connection from $\theta$ to $D$}.
 
-% But now comes the part which, conceptually, is harder to understand. 
-% When we write $p(D|\theta,I)$, this is a distribution for the data, given some values for the parameters $\theta$.
-% A ``point'' taken randomly from $p(D|\theta,I)$, corresponds to a random dataset.
-% But the likelihood is sometimes seen instead as a function of the parameters, given the observed dataset. 
-% In this form, the symbol $\mathcal{L}(\theta)$ is often used.
+But now comes the part which, conceptually, is harder to understand. 
+When we write $p(D|\theta,I)$, this is a distribution for the data, given some values for the parameters $\theta$.
+A ``point'' taken randomly from $p(D|\theta,I)$, corresponds to a random dataset.
+But the likelihood is sometimes seen instead as a function of the parameters, given the observed dataset. 
+In this form, the symbol $\mathcal{L}(\theta)$ is often used.
 
-% \begin{itemize}
-%   \item $p(D|\theta,I)$ - distribution for datasets, given $\theta$
-%   \item $\mathcal{L}(\theta)$ - function of 
-% \end{itemize}
+\begin{itemize}
+  \item $p(D|\theta,I)$ - distribution for datasets, given value of $\theta$
+  \item $\mathcal{L}(\theta)$ - function of $\theta$
+\end{itemize}
+
+This used to confuse me. 
+If it confuses you too, maybe an example will help.
+Consider Fig. \ref{fig:2nd_degree_like}, which tries to illustrate the likelihood.
+
+We are considering a model of the form $f(x) = A_1 + A_2\,x + A_3\, x^2$ and a Gaussian likelihood.
+The model prediction for a specific value of the parameters ($A_1 = 0.5; A_2 = 0.8; A_3 = -0.06$)
+is shown in blue. 
+The data we have actually observed are 5 pairs of values $(x_i, y_i)$, marked by the red crosses.
+On the \emph{z}-axis we depict the Gaussian likelihood distributions.
+These are Gaussian functions centered at each $f(x_i)$.
+We assumed that the width of these Gaussians is the same for all, and equal to $\sigma$.
+
+You can see that, for the assumed choice of model parameters, the probability of any $d_i$ is
+proportional to the height of the Gaussian curve directly above that data point, as shown by the solid lines.
+The probability of the complete dataset, $\{d_i\}_{i=1}^5$, is the product of the individual probabilities.
+
+If our data comes with error-bars, that is we have $(x_i, y_i, \sigma_i)$, and we want to incorporate that
+in the likelihood, then things are more like in Fig. \ref{fig:2nd_degree_like_heteroskedastic}.
+Now each Gaussian has a different width and the data is depicted with an errorbar on the \emph{y} direction.
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{../figs/likelihood_9.pdf}
+  \caption{Illustration of the calculation of the likelihood function for a model of the form $f(x) = A_1 + A_2\,x + A_3\, x^2$.
+           The smooth blue curve is the model prediction for a specific choice of the parameters. 
+           The predicted values of $f(x_i)$ for each choice of the independent variable $x_i$ are marked by a dashed line.
+           The actual measured value of $d_i$ (represented by a red cross) is located at the same value of $x_i$ but above or below $f(x_i)$ as a result of the uncertainty $\sigma$.
+           At the location of each $f(x_i)$ value we have constructed a Gaussian probability density function, with probability plotted in the z-coordinate. 
+           For the assumed choice of model parameters, the probability of any $d_i$ is proportional to the height of the Gaussian curve directly above that data point, which is shown by the solid lines.
+           %
+           Adapted from \cite{Gregory2010}.}
+  \label{fig:2nd_degree_like}
+\end{figure}
 
 
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{../figs/likelihood_heteroskedastic_8.pdf}
+  \caption{Same as Fig. \ref{fig:2nd_degree_like}\, but for data with error-bars.}
+  \label{fig:2nd_degree_like_heteroskedastic}
+\end{figure}
+
+
+Hopefully these figures shed some light on the ``distribution for data'' interpretation of the likelihood.
+But why is it a function of the parameters?
+
+Consider now Fig. \ref{fig:like_two_functions}, which shows what happens when the parameters $A_1, A_2, A_3$ change.
+The left panel is as before. In the right panel, note how the probabilities of each data point are now smaller.
+So their product will also be smaller, and therefore the likelihood of the full dataset is smaller.
+\textbf{The first set of parameters has a higher likelihood than the second set of parameters}.
+
+
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{../figs/likelihood_f1.png}
+    % \caption{A subfigure}
+    \label{fig:sub1}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{../figs/likelihood_f3.png}
+    % \caption{A subfigure}
+    \label{fig:sub2}
+  \end{subfigure}
+  \caption{Same as Fig. \ref{fig:2nd_degree_like_heteroskedastic}, but with two different values for the parameters $A_1, A_2, A_3$.
+           The data is the same as before but the model prediction and therefore the means of the Gaussian distributions, have changed. }
+  \label{fig:like_two_functions}
+\end{figure}
+
+
+
+\subsubsection{An example} % (fold)
+\label{ssub:an_example}
+
+  We now want to write a \texttt{Python} code to calculate the likelihood in the same exoplanet example.
+  As before, we start by stating some of the information that is included in $\mathcal{I}$.
+  A typical radial-velocity dataset contains $N$ observations $(t_i, v_i, \sigma_i)$ 
+  corresponding to the radial-velocity $v_i$ and its associated uncertainty $\sigma_i$ observed at time $t_i$.
+
+  We also know that the radial-velocity signal as a function of time $t$, produced by an orbiting planet 
+  is given by a Keplerian function 
+  \[\text{kep}(t,P,K,e,\omega,\chi)\]
+
+  \noindent This is our \emph{model}.
+  We will assume that the likelihood is Gaussian
+
+  \begin{equation}
+    p(v_i|t_i,\sigma_i, P,K,e,\omega,\chi, \mathcal{I}) \sim \mathcal{N}(\text{kep}(t_i,P,K,e,\omega,\chi), \sigma_i)
+  \end{equation}
+  %
+  and that the observations are independent.
+
+  Let's write this in \texttt{Python}, using the distributions from \texttt{Scipy}.
+  We want a function \texttt{log\_likelihood(t,v,sigma,P,K,e,w,X)} that returns the value of the logarithm of the likelihood, given the data and values of the parameters.
+  \newpage
+
+  %
+  \begin{minted}[linenos,
+                 numbersep=7pt,
+                 gobble=2,
+                 frame=lines,
+                 framesep=0mm]{python}
+    from scipy.stats import norm
+    from numpy import sum
+
+    def likelihood(t,v,sigma,P,K,e,w,X):
+      # t, v and sigma are arrays
+      # P, K, e, w, X are floats
+
+      # the function kep calculates the Keplerian signal
+      model_rv = kep(t, P, K, e, w, X)
+
+      loglike = sum([norm(loc=rv, scale=s).logpdf(obs_v) 
+                     for rv, s, obs_v in zip(model_rv, sigma, v)])
+
+      return loglike
+  \end{minted}
+
+% subsubsection an_example (end)
+
+
+
+
+\newpage
 \section{MCMC}
 
 Markov chain Monte Carlo (MCMC) is the workhorse of Bayesian statistics.
